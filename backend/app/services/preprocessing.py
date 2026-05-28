@@ -1,8 +1,6 @@
 import os
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
 from app.config import settings
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
@@ -21,6 +19,9 @@ def preprocess(test_size: float = 0.2, random_state: int = 42):
     """
     Full preprocessing pipeline.
     """
+    from sklearn.model_selection import train_test_split
+    from sklearn.preprocessing import LabelEncoder
+
     movies, ratings = load_data()
 
     # Drop duplicates & missing values

@@ -7,8 +7,14 @@ from app.database import get_session
 from app.models import User, UserRating, Bookmark
 from app.auth import get_current_admin
 from app.config import settings
-from app.services.train_job import train_model, HISTORY_PATH
 import app.services.recommender as rec
+
+try:
+    from app.services.train_job import train_model, HISTORY_PATH
+except ImportError:
+    train_model = None
+    MODEL_DIR = os.path.join(settings.BASE_DIR, "..", "models")
+    HISTORY_PATH = os.path.join(MODEL_DIR, "training_history.json")
 
 router = APIRouter(prefix="/admin", tags=["Admin Dashboard"])
 
@@ -59,6 +65,11 @@ async def trigger_retraining(
 ):
     """Triggers asynchronous PyTorch model retraining in background tasks thread pool."""
     global _training_status
+    if train_model is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Model training is not supported in the serverless production environment. Please run retraining locally."
+        )
     if _training_status["running"]:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
