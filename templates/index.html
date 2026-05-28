@@ -1,0 +1,391 @@
+{% extends "base.html" %}
+{% block title %}CinematIX – AI Movie Recommendations{% endblock %}
+
+{% block content %}
+
+<!-- ═══════════════════════ SPOTLIGHT HERO BANNER ═══════════════════════ -->
+<section class="hero-section" style="background-image: linear-gradient(to right, rgba(20,20,20,0.95) 0%, rgba(20,20,20,0.5) 45%, transparent 80%), linear-gradient(to top, rgba(20,20,20,1) 0%, rgba(20,20,20,0) 30%), url('https://image.tmdb.org/t/p/original/8ZgRns495Q3RL444wPa6Jww9eOI.jpg');">
+  <div class="hero-overlay-dark"></div>
+  <div class="hero-content">
+    <div class="hero-badge-netflix">
+      <span>N</span> CinematIX Spotlight
+    </div>
+    <h1 class="hero-title-large">Inception</h1>
+    <div class="hero-meta">
+      <span class="hero-match"><i class="bi bi-star-fill text-warning me-1"></i>98% Match</span>
+      <span class="hero-year">2010</span>
+      <span class="hero-rating-badge">13+</span>
+      <span class="text-white-50">Action / Sci-Fi / Thriller</span>
+    </div>
+    <p class="hero-desc">
+      Cobb, a skilled thief who steals corporate secrets through dream-sharing technology, is given a final chance at redemption: plant an idea into a target's mind rather than steal it. But his tragic past threatens the mission.
+    </p>
+    <div class="d-flex gap-3">
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('recommendations') }}" class="btn btn-primary-red">
+          <i class="bi bi-stars"></i> Get My Top Picks
+        </a>
+      {% else %}
+        <a href="{{ url_for('register') }}" class="btn btn-primary-red">
+          <i class="bi bi-play-fill"></i> Get Started Free
+        </a>
+      {% endif %}
+      <a href="{{ url_for('bookmarks') }}" class="btn btn-secondary-netflix">
+        <i class="bi bi-plus-lg"></i> My List
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ HOW IT WORKS (COLLAPSIBLE FOR PREMIUM LOOK) ═══════════════════════ -->
+{% if not current_user.is_authenticated %}
+<section class="section-dark">
+  <div class="container">
+    <h2 class="section-title text-center mb-5">How CinematIX Works</h2>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="feature-card text-center">
+          <div class="feature-icon"><i class="bi bi-person-check-fill"></i></div>
+          <h5 class="feature-title text-white">1. Create Your Profile</h5>
+          <p class="text-muted small mb-0">Sign up and rate a few movies you've already watched to teach our NCF model your taste.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-card text-center">
+          <div class="feature-icon"><i class="bi bi-brain"></i></div>
+          <h5 class="feature-title text-white">2. AI Learns Your Taste</h5>
+          <p class="text-muted small mb-0">Our Neural Collaborative Filtering model embeds your preferences into a high-dimensional space.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-card text-center">
+          <div class="feature-icon"><i class="bi bi-stars"></i></div>
+          <h5 class="feature-title text-white">3. Get Recommendations</h5>
+          <p class="text-muted small mb-0">Receive personalized recommendations ranked by AI confidence score — updated in real time.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ═══════════════════════ HORIZONTAL SHELVES ═══════════════════════ -->
+{% if model_ready and trending %}
+
+<!-- 1. TRENDING NOW SHELF -->
+<div class="movie-shelf-container">
+  <h2 class="movie-shelf-header">
+    <i class="bi bi-fire text-danger me-2"></i>Trending Now
+  </h2>
+  <div class="movie-shelf-wrapper">
+    <button class="shelf-nav-btn shelf-nav-btn-left" onclick="scrollShelf(this, -1)"><i class="bi bi-chevron-left"></i></button>
+    <div class="movie-shelf">
+      {% for movie in trending[:16] %}
+      <div class="movie-card" data-title="{{ movie.title }}" data-movie-id="{{ movie.movieId }}" data-genres="{{ movie.genres }}">
+        <div class="movie-poster-wrap">
+          <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" class="movie-poster" loading="lazy" onerror="showFallbackPoster(this)"/>
+          
+          <div class="movie-overlay">
+            <div class="movie-actions">
+              {% if current_user.is_authenticated %}
+              <button class="movie-action-btn bookmark-btn"
+                      data-movie-id="{{ movie.movieId }}"
+                      data-title="{{ movie.title }}"
+                      data-genres="{{ movie.genres }}"
+                      title="Add to My List">
+                <i class="bi bi-plus-lg"></i>
+              </button>
+              {% endif %}
+              <div class="movie-score-badge">
+                {{ "%.1f"|format(movie.avg_score) }} ★
+              </div>
+            </div>
+            
+            <!-- Star rating widget -->
+            <div class="star-rating-widget" data-movie-id="{{ movie.movieId }}"
+                 data-title="{{ movie.title }}" data-genres="{{ movie.genres }}">
+              {% for star in [1,2,3,4,5] %}
+              <i class="bi bi-star-fill rating-star" data-value="{{ star }}"></i>
+              {% endfor %}
+            </div>
+            
+            <div class="movie-genres-overlay">
+              {% for g in movie.genres.split('|')[:2] %}
+                <span class="genre-tag">{{ g }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        
+        <div class="movie-info">
+          <div class="movie-title" title="{{ movie.title }}">{{ movie.title }}</div>
+          <div class="movie-meta-row">
+            <span class="movie-meta-match">92% Match</span>
+            <span>{{ movie.genres.split('|')[0] }}</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <button class="shelf-nav-btn shelf-nav-btn-right" onclick="scrollShelf(this, 1)"><i class="bi bi-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- Group trending into lists for other rows dynamically -->
+{% set action_list = [] %}
+{% set scifi_list = [] %}
+{% set drama_list = [] %}
+{% set comedy_list = [] %}
+
+{% for m in trending %}
+  {% if 'action' in m.genres.lower() or 'thriller' in m.genres.lower() %}
+    {% if action_list.append(m) %}{% endif %}
+  {% endif %}
+  {% if 'sci-fi' in m.genres.lower() or 'adventure' in m.genres.lower() %}
+    {% if scifi_list.append(m) %}{% endif %}
+  {% endif %}
+  {% if 'drama' in m.genres.lower() or 'romance' in m.genres.lower() %}
+    {% if drama_list.append(m) %}{% endif %}
+  {% endif %}
+  {% if 'comedy' in m.genres.lower() or 'animation' in m.genres.lower() or 'children' in m.genres.lower() %}
+    {% if comedy_list.append(m) %}{% endif %}
+  {% endif %}
+{% endfor %}
+
+<!-- 2. ACTION & THRILLERS SHELF -->
+{% if action_list %}
+<div class="movie-shelf-container">
+  <h2 class="movie-shelf-header">
+    <i class="bi bi-lightning-fill text-danger me-2"></i>Action &amp; Thrillers
+  </h2>
+  <div class="movie-shelf-wrapper">
+    <button class="shelf-nav-btn shelf-nav-btn-left" onclick="scrollShelf(this, -1)"><i class="bi bi-chevron-left"></i></button>
+    <div class="movie-shelf">
+      {% for movie in action_list %}
+      <div class="movie-card" data-title="{{ movie.title }}" data-movie-id="{{ movie.movieId }}" data-genres="{{ movie.genres }}">
+        <div class="movie-poster-wrap">
+          <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" class="movie-poster" loading="lazy" onerror="showFallbackPoster(this)"/>
+          
+          <div class="movie-overlay">
+            <div class="movie-actions">
+              {% if current_user.is_authenticated %}
+              <button class="movie-action-btn bookmark-btn"
+                      data-movie-id="{{ movie.movieId }}"
+                      data-title="{{ movie.title }}"
+                      data-genres="{{ movie.genres }}"
+                      title="Add to My List">
+                <i class="bi bi-plus-lg"></i>
+              </button>
+              {% endif %}
+              <div class="movie-score-badge">
+                {{ "%.1f"|format(movie.avg_score) }} ★
+              </div>
+            </div>
+            
+            <div class="star-rating-widget" data-movie-id="{{ movie.movieId }}"
+                 data-title="{{ movie.title }}" data-genres="{{ movie.genres }}">
+              {% for star in [1,2,3,4,5] %}
+              <i class="bi bi-star-fill rating-star" data-value="{{ star }}"></i>
+              {% endfor %}
+            </div>
+            
+            <div class="movie-genres-overlay">
+              {% for g in movie.genres.split('|')[:2] %}
+                <span class="genre-tag">{{ g }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        
+        <div class="movie-info">
+          <div class="movie-title" title="{{ movie.title }}">{{ movie.title }}</div>
+          <div class="movie-meta-row">
+            <span class="movie-meta-match">94% Match</span>
+            <span>{{ movie.genres.split('|')[0] }}</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <button class="shelf-nav-btn shelf-nav-btn-right" onclick="scrollShelf(this, 1)"><i class="bi bi-chevron-right"></i></button>
+  </div>
+</div>
+{% endif %}
+
+<!-- 3. SCI-FI & FANTASY SHELF -->
+{% if scifi_list %}
+<div class="movie-shelf-container">
+  <h2 class="movie-shelf-header">
+    <i class="bi bi-cpu-fill text-danger me-2"></i>Sci-Fi &amp; Adventure
+  </h2>
+  <div class="movie-shelf-wrapper">
+    <button class="shelf-nav-btn shelf-nav-btn-left" onclick="scrollShelf(this, -1)"><i class="bi bi-chevron-left"></i></button>
+    <div class="movie-shelf">
+      {% for movie in scifi_list %}
+      <div class="movie-card" data-title="{{ movie.title }}" data-movie-id="{{ movie.movieId }}" data-genres="{{ movie.genres }}">
+        <div class="movie-poster-wrap">
+          <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" class="movie-poster" loading="lazy" onerror="showFallbackPoster(this)"/>
+          
+          <div class="movie-overlay">
+            <div class="movie-actions">
+              {% if current_user.is_authenticated %}
+              <button class="movie-action-btn bookmark-btn"
+                      data-movie-id="{{ movie.movieId }}"
+                      data-title="{{ movie.title }}"
+                      data-genres="{{ movie.genres }}"
+                      title="Add to My List">
+                <i class="bi bi-plus-lg"></i>
+              </button>
+              {% endif %}
+              <div class="movie-score-badge">
+                {{ "%.1f"|format(movie.avg_score) }} ★
+              </div>
+            </div>
+            
+            <div class="star-rating-widget" data-movie-id="{{ movie.movieId }}"
+                 data-title="{{ movie.title }}" data-genres="{{ movie.genres }}">
+              {% for star in [1,2,3,4,5] %}
+              <i class="bi bi-star-fill rating-star" data-value="{{ star }}"></i>
+              {% endfor %}
+            </div>
+            
+            <div class="movie-genres-overlay">
+              {% for g in movie.genres.split('|')[:2] %}
+                <span class="genre-tag">{{ g }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        
+        <div class="movie-info">
+          <div class="movie-title" title="{{ movie.title }}">{{ movie.title }}</div>
+          <div class="movie-meta-row">
+            <span class="movie-meta-match">96% Match</span>
+            <span>{{ movie.genres.split('|')[0] }}</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <button class="shelf-nav-btn shelf-nav-btn-right" onclick="scrollShelf(this, 1)"><i class="bi bi-chevron-right"></i></button>
+  </div>
+</div>
+{% endif %}
+
+<!-- 4. COMEDIES & ANIMATION -->
+{% if comedy_list %}
+<div class="movie-shelf-container">
+  <h2 class="movie-shelf-header">
+    <i class="bi bi-emoji-laughing-fill text-danger me-2"></i>Comedies &amp; Animation
+  </h2>
+  <div class="movie-shelf-wrapper">
+    <button class="shelf-nav-btn shelf-nav-btn-left" onclick="scrollShelf(this, -1)"><i class="bi bi-chevron-left"></i></button>
+    <div class="movie-shelf">
+      {% for movie in comedy_list %}
+      <div class="movie-card" data-title="{{ movie.title }}" data-movie-id="{{ movie.movieId }}" data-genres="{{ movie.genres }}">
+        <div class="movie-poster-wrap">
+          <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" class="movie-poster" loading="lazy" onerror="showFallbackPoster(this)"/>
+          
+          <div class="movie-overlay">
+            <div class="movie-actions">
+              {% if current_user.is_authenticated %}
+              <button class="movie-action-btn bookmark-btn"
+                      data-movie-id="{{ movie.movieId }}"
+                      data-title="{{ movie.title }}"
+                      data-genres="{{ movie.genres }}"
+                      title="Add to My List">
+                <i class="bi bi-plus-lg"></i>
+              </button>
+              {% endif %}
+              <div class="movie-score-badge">
+                {{ "%.1f"|format(movie.avg_score) }} ★
+              </div>
+            </div>
+            
+            <div class="star-rating-widget" data-movie-id="{{ movie.movieId }}"
+                 data-title="{{ movie.title }}" data-genres="{{ movie.genres }}">
+              {% for star in [1,2,3,4,5] %}
+              <i class="bi bi-star-fill rating-star" data-value="{{ star }}"></i>
+              {% endfor %}
+            </div>
+            
+            <div class="movie-genres-overlay">
+              {% for g in movie.genres.split('|')[:2] %}
+                <span class="genre-tag">{{ g }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        
+        <div class="movie-info">
+          <div class="movie-title" title="{{ movie.title }}">{{ movie.title }}</div>
+          <div class="movie-meta-row">
+            <span class="movie-meta-match">90% Match</span>
+            <span>{{ movie.genres.split('|')[0] }}</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <button class="shelf-nav-btn shelf-nav-btn-right" onclick="scrollShelf(this, 1)"><i class="bi bi-chevron-right"></i></button>
+  </div>
+</div>
+{% endif %}
+
+{% elif not model_ready %}
+<section class="section-movies py-5">
+  <div class="container text-center py-5">
+    <div class="model-not-ready-card">
+      <i class="bi bi-robot display-1 text-muted mb-3 d-block"></i>
+      <h3 class="text-muted">AI Model Not Trained Yet</h3>
+      <p class="text-muted">An admin needs to train the model to build movie shelves.</p>
+      {% if current_user.is_authenticated and current_user.is_admin %}
+        <a href="{{ url_for('dashboard') }}" class="btn btn-primary-red mt-2">
+          <i class="bi bi-speedometer2 me-2"></i>Go to Admin Dashboard
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ═══════════════════════ CTA BANNER ═══════════════════════ -->
+{% if not current_user.is_authenticated %}
+<section class="cta-section py-5">
+  <div class="container text-center">
+    <h2 class="fw-bold text-white mb-3">Ready to find your next favourite film?</h2>
+    <p class="text-muted mb-4">Join thousands of users getting AI-powered recommendations every day.</p>
+    <a href="{{ url_for('register') }}" class="btn btn-primary-red btn-lg me-3">
+      <i class="bi bi-person-plus-fill me-2"></i>Create Free Account
+    </a>
+    <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg">Login</a>
+  </div>
+</section>
+{% endif %}
+
+<!-- Rate Toast Notification -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index:1090">
+  <div id="rateToast" class="toast align-items-center text-bg-success border-0" role="alert">
+    <div class="d-flex">
+      <div class="toast-body" id="rateToastMsg">Rating saved!</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Horizontally scrolls shelves
+function scrollShelf(btn, direction) {
+  const wrapper = btn.closest('.movie-shelf-wrapper');
+  const shelf = wrapper.querySelector('.movie-shelf');
+  const scrollAmount = shelf.clientWidth * 0.75;
+  shelf.scrollBy({
+    left: scrollAmount * direction,
+    behavior: 'smooth'
+  });
+}
+</script>
+{% endblock %}

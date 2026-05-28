@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Search Movies – CinematIX{% endblock %}
+
+{% block content %}
+<div class="page-content">
+  <div class="container-fluid px-4 pt-4">
+
+    <div class="page-header mb-4">
+      <h1 class="page-title text-white"><i class="bi bi-search text-danger me-2"></i>Search Movies</h1>
+      <p class="text-muted mb-0">Find any movie and rate it to improve your AI recommendations.</p>
+    </div>
+
+    <!-- Search form -->
+    <form class="mb-5" action="{{ url_for('search') }}" method="get">
+      <div class="row g-2 justify-content-center">
+        <div class="col-md-8">
+          <div class="input-group search-page-group">
+            <span class="input-group-text search-icon-wrap"><i class="bi bi-search"></i></span>
+            <input type="search" class="form-control search-page-input" name="q"
+                   value="{{ query }}" placeholder="Search by movie title…"
+                   autofocus autocomplete="off" id="searchPageInput" />
+            <button class="btn btn-primary-red" type="submit">Search</button>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <!-- Results -->
+    {% if query and not movies %}
+      <div class="empty-state text-center py-5">
+        <i class="bi bi-film display-2 text-muted mb-3 d-block"></i>
+        <h4 class="text-muted">No movies found for "{{ query }}"</h4>
+        <p class="text-muted">Try a different keyword or check spelling.</p>
+      </div>
+    {% elif movies %}
+      <h5 class="text-muted mb-4">
+        {{ movies|length }} result{{ 's' if movies|length != 1 }} for
+        <span class="text-white">"{{ query }}"</span>
+      </h5>
+      <div class="row g-3">
+        {% for movie in movies %}
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2 d-flex">
+          <div class="movie-card w-100" data-movie-id="{{ movie.movieId }}"
+               data-title="{{ movie.title }}" data-genres="{{ movie.genres }}">
+            <div class="movie-poster-wrap">
+              <img src="{{ movie.poster_url }}" alt="{{ movie.title }}"
+                   class="movie-poster" loading="lazy"
+                   onerror="showFallbackPoster(this)"/>
+              
+              <div class="movie-overlay">
+                {% if current_user.is_authenticated %}
+                <div class="movie-actions">
+                  <button class="movie-action-btn bookmark-btn"
+                          data-movie-id="{{ movie.movieId }}"
+                          data-title="{{ movie.title }}"
+                          data-genres="{{ movie.genres }}"
+                          title="Add to My List">
+                    <i class="bi bi-plus-lg"></i>
+                  </button>
+                </div>
+                
+                <div class="star-rating-widget" data-movie-id="{{ movie.movieId }}"
+                     data-title="{{ movie.title }}" data-genres="{{ movie.genres }}">
+                  {% for star in [1,2,3,4,5] %}
+                  <i class="bi bi-star-fill rating-star" data-value="{{ star }}"></i>
+                  {% endfor %}
+                </div>
+                {% endif %}
+                
+                <div class="movie-genres-overlay">
+                  {% for g in movie.genres.split('|')[:2] %}
+                    <span class="genre-tag">{{ g }}</span>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            
+            <div class="movie-info">
+              <div class="movie-title" title="{{ movie.title }}">{{ movie.title }}</div>
+              <div class="movie-meta-row">
+                <span class="movie-meta-match">90% Match</span>
+                <span>{{ movie.genres.split('|')[0] }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="text-center py-5 text-muted">
+        <i class="bi bi-camera-reels display-2 mb-3 text-danger d-block"></i>
+        <p>Start typing to search from thousands of movies.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index:1090">
+  <div id="rateToast" class="toast align-items-center text-bg-success border-0" role="alert">
+    <div class="d-flex">
+      <div class="toast-body" id="rateToastMsg">Rating saved!</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Search Page Star rating logic
+</script>
+{% endblock %}

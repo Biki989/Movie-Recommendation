@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Login – CinematIX{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="auth-bg-blur"></div>
+  <div class="container d-flex justify-content-center align-items-center" style="min-height:100vh; padding-top:80px;">
+    <div class="auth-card">
+
+      <!-- Logo -->
+      <div class="text-center mb-4">
+        <div class="auth-logo"><i class="bi bi-film"></i> CinematIX</div>
+        <h2 class="auth-title mt-2">Welcome Back</h2>
+        <p class="text-muted">Sign in to your account to continue</p>
+      </div>
+
+      <!-- Form -->
+      <form method="POST" action="{{ url_for('login') }}" id="loginForm" novalidate>
+        <div class="mb-3">
+          <label class="form-label text-secondary" for="email">Email Address</label>
+          <div class="input-group auth-input-group">
+            <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
+            <input type="email" class="form-control auth-input" id="email" name="email"
+                   placeholder="you@example.com" required
+                   value="{{ request.form.get('email', '') }}" />
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label text-secondary" for="password">Password</label>
+          <div class="input-group auth-input-group">
+            <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+            <input type="password" class="form-control auth-input" id="password"
+                   name="password" placeholder="••••••••" required />
+            <button class="btn btn-outline-secondary toggle-pw" type="button" tabindex="-1">
+              <i class="bi bi-eye-fill"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary-red w-100 btn-lg mt-2" id="loginBtn">
+          <span class="btn-text"><i class="bi bi-box-arrow-in-right me-2"></i>Sign In</span>
+          <span class="btn-spinner spinner-border spinner-border-sm d-none" role="status"></span>
+        </button>
+      </form>
+
+      <!-- Demo creds hint -->
+      <div class="demo-hint mt-3">
+        <i class="bi bi-info-circle me-1 text-info"></i>
+        Admin: <code>admin@cinematix.ai</code> / <code>admin123</code>
+      </div>
+
+      <hr class="border-secondary my-4" />
+      <p class="text-center text-muted mb-0">
+        Don't have an account?
+        <a href="{{ url_for('register') }}" class="text-danger fw-semibold">Sign Up Free</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Toggle password visibility
+document.querySelector('.toggle-pw').addEventListener('click', function () {
+  const pw = document.getElementById('password');
+  const icon = this.querySelector('i');
+  if (pw.type === 'password') {
+    pw.type = 'text';
+    icon.className = 'bi bi-eye-slash-fill';
+  } else {
+    pw.type = 'password';
+    icon.className = 'bi bi-eye-fill';
+  }
+});
+
+// Loading spinner on submit
+document.getElementById('loginForm').addEventListener('submit', function () {
+  const btn = document.getElementById('loginBtn');
+  btn.querySelector('.btn-text').classList.add('d-none');
+  btn.querySelector('.btn-spinner').classList.remove('d-none');
+  btn.disabled = true;
+});
+</script>
+{% endblock %}

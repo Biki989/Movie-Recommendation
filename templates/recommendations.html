@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block title %}My Recommendations – CinematIX{% endblock %}
+
+{% block content %}
+<div class="page-content">
+  <div class="container-fluid px-4">
+
+    <!-- Page Header -->
+    <div class="page-header d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 pt-4">
+      <div>
+        <h1 class="page-title text-white">
+          <i class="bi bi-stars text-danger me-2"></i>Your AI Recommendations
+        </h1>
+        <p class="text-muted mb-0">Personalized just for you by our Neural Collaborative Filtering network.</p>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <a href="{{ url_for('recommendations') }}" class="btn btn-secondary-netflix btn-sm">
+          <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+        </a>
+        <a href="{{ url_for('history') }}" class="btn btn-secondary-netflix btn-sm">
+          <i class="bi bi-clock-history me-1"></i>Watch History
+        </a>
+      </div>
+    </div>
+
+    <!-- Genre Filter Sidebar + Grid -->
+    <div class="row g-4">
+
+      <!-- Sidebar -->
+      <div class="col-lg-2 col-md-3">
+        <div class="filter-sidebar">
+          <h6 class="sidebar-title"><i class="bi bi-funnel-fill me-2"></i>Filter by Genre</h6>
+          <div class="sidebar-genre-list">
+            <a href="{{ url_for('recommendations') }}"
+               class="sidebar-genre-item {% if genre_filter == 'All' %}active{% endif %}">
+              <i class="bi bi-grid-fill me-2"></i>All Genres
+            </a>
+            {% for genre in genres %}
+            <a href="{{ url_for('recommendations', genre=genre) }}"
+               class="sidebar-genre-item {% if genre_filter == genre %}active{% endif %}">
+              <i class="bi bi-chevron-right me-2"></i>{{ genre }}
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Movie Grid -->
+      <div class="col-lg-10 col-md-9">
+
+        {% if not recs %}
+          <div class="empty-state text-center py-5">
+            <i class="bi bi-film display-2 text-muted mb-3 d-block"></i>
+            <h4 class="text-muted">No recommendations found</h4>
+            <p class="text-muted">Try a different genre filter or rate some movies first.</p>
+            <a href="{{ url_for('search') }}" class="btn btn-primary-red mt-2">
+              <i class="bi bi-search me-2"></i>Search Movies to Rate
+            </a>
+          </div>
+        {% else %}
+          <!-- AI Confidence Legend -->
+          <div class="confidence-legend mb-4">
+            <i class="bi bi-info-circle me-2 text-info"></i>
+            <span class="text-white"><strong>AI Match %:</strong> Our neural network predicts you will highly enjoy these picks.</span>
+            <div class="confidence-scale ms-md-auto">
+              <span class="conf-low">Low Match (&lt;40%)</span>
+              <span class="conf-mid">Good Match (40–70%)</span>
+              <span class="conf-high">Strong Match (&gt;70%)</span>
+            </div>
+          </div>
+
+          <div class="row g-3" id="recGrid">
+            {% for movie in recs %}
+            <div class="col-6 col-sm-4 col-md-4 col-lg-3 col-xl-2 d-flex">
+              <div class="movie-card rec-card w-100" data-movie-id="{{ movie.movieId }}"
+                   data-title="{{ movie.title }}" data-genres="{{ movie.genres }}">
+
+                <div class="movie-poster-wrap">
+                  <img src="{{ movie.poster_url }}" alt="{{ movie.title }}"
+                       class="movie-poster" loading="lazy"
+                       onerror="showFallbackPoster(this)"/>
+
+                  <!-- Confidence badge -->
+                  <div class="confidence-badge
+                    {% if movie.confidence_pct >= 70 %}conf-high
+                    {% elif movie.confidence_pct >= 40 %}conf-mid
+                    {% else %}conf-low{% endif %}">
+                    {{ movie.confidence_pct }}% Match
+                  </div>
+
+                  <div class="movie-overlay">
+                    <div class="movie-actions">
+                      <button class="movie-action-btn bookmark-btn"
+                              data-movie-id="{{ movie.movieId }}"
+                              data-title="{{ movie.title }}"
+                              data-genres="{{ movie.genres }}"
+                              title="Add to My List">
+                        <i class="bi bi-plus-lg"></i>
+                      </button>
+                      <div class="movie-score-badge">
+                        {{ movie.predicted_rating }}/5
+                      </div>
+                    </div>
+                    
+                    <!-- Star rating widget -->
+                    <div class="star-rating-widget" data-movie-id="{{ movie.movieId }}"
+                         data-title="{{ movie.title }}" data-genres="{{ movie.genres }}">
+                      {% for star in [1,2,3,4,5] %}
+                      <i class="bi bi-star-fill rating-star" data-value="{{ star }}"></i>
+                      {% endfor %}
+                    </div>
+                    
+                    <div class="movie-genres-overlay">
+                      {% for g in movie.genres.split('|')[:2] %}
+                        <span class="genre-tag">{{ g }}</span>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="movie-info">
+                  <div class="movie-title" title="{{ movie.title }}">{{ movie.title }}</div>
+                  <div class="movie-meta-row">
+                    <span class="movie-meta-match">{{ movie.confidence_pct }}% Match</span>
+                    <span>{{ movie.genres.split('|')[0] }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Rate Toast Notification -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index:1090">
+  <div id="rateToast" class="toast align-items-center text-bg-success border-0" role="alert">
+    <div class="d-flex">
+      <div class="toast-body" id="rateToastMsg">Rating saved!</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Recommendations Page Script
+</script>
+{% endblock %}

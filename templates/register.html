@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Create Account – CinematIX{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="auth-bg-blur"></div>
+  <div class="container d-flex justify-content-center align-items-center" style="min-height:100vh; padding-top:80px;">
+    <div class="auth-card" style="max-width:480px;">
+
+      <div class="text-center mb-4">
+        <div class="auth-logo"><i class="bi bi-film"></i> CinematIX</div>
+        <h2 class="auth-title mt-2">Create Your Account</h2>
+        <p class="text-muted">Start getting AI-powered movie recommendations</p>
+      </div>
+
+      <form method="POST" action="{{ url_for('register') }}" id="registerForm" novalidate>
+
+        <div class="mb-3">
+          <label class="form-label text-secondary" for="username">Username</label>
+          <div class="input-group auth-input-group">
+            <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+            <input type="text" class="form-control auth-input" id="username" name="username"
+                   placeholder="cinephile42" required minlength="3"
+                   value="{{ request.form.get('username', '') }}" />
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-secondary" for="email">Email Address</label>
+          <div class="input-group auth-input-group">
+            <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
+            <input type="email" class="form-control auth-input" id="email" name="email"
+                   placeholder="you@example.com" required
+                   value="{{ request.form.get('email', '') }}" />
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-secondary" for="password">Password</label>
+          <div class="input-group auth-input-group">
+            <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+            <input type="password" class="form-control auth-input" id="password"
+                   name="password" placeholder="Min 6 characters" required minlength="6" />
+            <button class="btn btn-outline-secondary toggle-pw" type="button" tabindex="-1">
+              <i class="bi bi-eye-fill"></i>
+            </button>
+          </div>
+          <!-- Strength bar -->
+          <div class="pw-strength-wrap mt-1">
+            <div class="pw-strength-bar" id="pwStrengthBar"></div>
+          </div>
+          <small class="pw-strength-label text-muted" id="pwStrengthLabel"></small>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label text-secondary" for="confirm_password">Confirm Password</label>
+          <div class="input-group auth-input-group">
+            <span class="input-group-text"><i class="bi bi-shield-lock-fill"></i></span>
+            <input type="password" class="form-control auth-input" id="confirm_password"
+                   name="confirm_password" placeholder="Repeat password" required />
+          </div>
+          <small class="text-danger d-none" id="pwMatchError">Passwords do not match.</small>
+        </div>
+
+        <button type="submit" class="btn btn-primary-red w-100 btn-lg" id="registerBtn">
+          <span class="btn-text"><i class="bi bi-person-plus-fill me-2"></i>Create Account</span>
+          <span class="btn-spinner spinner-border spinner-border-sm d-none" role="status"></span>
+        </button>
+      </form>
+
+      <hr class="border-secondary my-4" />
+      <p class="text-center text-muted mb-0">
+        Already have an account?
+        <a href="{{ url_for('login') }}" class="text-danger fw-semibold">Sign In</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Password visibility toggle
+document.querySelector('.toggle-pw').addEventListener('click', function () {
+  const pw = document.getElementById('password');
+  const icon = this.querySelector('i');
+  pw.type = pw.type === 'password' ? 'text' : 'password';
+  icon.className = pw.type === 'password' ? 'bi bi-eye-fill' : 'bi bi-eye-slash-fill';
+});
+
+// Password strength meter
+const pwInput = document.getElementById('password');
+const bar     = document.getElementById('pwStrengthBar');
+const label   = document.getElementById('pwStrengthLabel');
+pwInput.addEventListener('input', () => {
+  const v = pwInput.value;
+  let score = 0;
+  if (v.length >= 6)  score++;
+  if (v.length >= 10) score++;
+  if (/[A-Z]/.test(v)) score++;
+  if (/[0-9]/.test(v)) score++;
+  if (/[^A-Za-z0-9]/.test(v)) score++;
+  const levels = ['','Weak','Fair','Good','Strong','Very Strong'];
+  const colors = ['','#e50914','#f5a623','#f5c518','#00d4aa','#6dd400'];
+  bar.style.width = (score * 20) + '%';
+  bar.style.background = colors[score] || '#555';
+  label.textContent = levels[score] || '';
+});
+
+// Password match check
+document.getElementById('confirm_password').addEventListener('input', function () {
+  const match = this.value === pwInput.value;
+  document.getElementById('pwMatchError').classList.toggle('d-none', match);
+});
+
+// Loading spinner
+document.getElementById('registerForm').addEventListener('submit', function (e) {
+  const pw  = document.getElementById('password').value;
+  const cpw = document.getElementById('confirm_password').value;
+  if (pw !== cpw) { e.preventDefault(); return; }
+  const btn = document.getElementById('registerBtn');
+  btn.querySelector('.btn-text').classList.add('d-none');
+  btn.querySelector('.btn-spinner').classList.remove('d-none');
+  btn.disabled = true;
+});
+</script>
+{% endblock %}

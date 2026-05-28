@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}My Bookmarks – CinematIX{% endblock %}
+
+{% block content %}
+<div class="page-content">
+  <div class="container-fluid px-4 pt-4">
+    <div class="page-header mb-4">
+      <h1 class="page-title text-white"><i class="bi bi-bookmark-heart-fill text-danger me-2"></i>My Bookmarks</h1>
+      <p class="text-muted mb-0">Your saved movies, kept here for easy access.</p>
+    </div>
+
+    {% if not bookmarks %}
+      <div class="empty-state text-center py-5">
+        <i class="bi bi-bookmark-x display-2 text-danger mb-3 d-block"></i>
+        <h4 class="text-muted">Your list is empty</h4>
+        <p class="text-muted">Browse recommendations and click the bookmark icon to save movies here.</p>
+        <a href="{{ url_for('recommendations') }}" class="btn btn-primary-red mt-2">
+          <i class="bi bi-stars me-2"></i>View Recommendations
+        </a>
+      </div>
+    {% else %}
+      <div class="row g-3">
+        {% for movie in bookmarks %}
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2 d-flex">
+          <div class="movie-card w-100" data-movie-id="{{ movie.movieId }}"
+               data-title="{{ movie.title }}" data-genres="{{ movie.genres }}">
+            <div class="movie-poster-wrap">
+              <img src="{{ movie.poster_url }}" alt="{{ movie.title }}"
+                   class="movie-poster" loading="lazy"
+                   onerror="showFallbackPoster(this)"/>
+              
+              <div class="movie-overlay">
+                <div class="movie-actions">
+                  <button class="movie-action-btn bookmark-btn active"
+                          data-movie-id="{{ movie.movieId }}"
+                          data-title="{{ movie.title }}"
+                          data-genres="{{ movie.genres }}"
+                          title="Remove from My List">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </div>
+                
+                <div class="movie-genres-overlay">
+                  {% for g in movie.genres.split('|')[:2] %}
+                    <span class="genre-tag">{{ g }}</span>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            
+            <div class="movie-info">
+              <div class="movie-title" title="{{ movie.title }}">{{ movie.title }}</div>
+              <div class="movie-meta-row">
+                <span class="text-muted small">Saved: {{ movie.bookmarked_at }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
