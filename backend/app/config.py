@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     # Database URL: fallback to sqlite inside local backend folder if not provided
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL", 
-        f"sqlite:///{os.path.join(BASE_DIR, 'database_production.db')}"
+        f"sqlite:////tmp/database_production.db" if os.getenv("VERCEL") else f"sqlite:///{os.path.join(BASE_DIR, 'database_production.db')}"
     )
     
     TMDB_API_KEY: str = os.getenv("TMDB_API_KEY", "")
