@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { API_BASE } from "../config";
 
 const AuthContext = createContext(null);
 
@@ -14,7 +15,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     async function checkAuth() {
       try {
-        const resp = await fetch("http://localhost:8000/api/auth/me", {
+        const resp = await fetch(`${API_BASE}/api/auth/me`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
           // Include cookies automatically in fetch request
@@ -34,7 +35,7 @@ export function AuthProvider({ children }) {
   async function fetchProfile() {
     setLoading(true);
     try {
-      const resp = await fetch("http://localhost:8000/api/auth/me", {
+      const resp = await fetch(`${API_BASE}/api/auth/me`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
         credentials: "include"
@@ -54,7 +55,7 @@ export function AuthProvider({ children }) {
 
   async function login(email, password) {
     try {
-      const resp = await fetch("http://localhost:8000/api/auth/login", {
+      const resp = await fetch(`${API_BASE}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -76,7 +77,7 @@ export function AuthProvider({ children }) {
 
   async function register(username, email, password) {
     try {
-      const resp = await fetch("http://localhost:8000/api/auth/register", {
+      const resp = await fetch(`${API_BASE}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, password }),
@@ -97,7 +98,7 @@ export function AuthProvider({ children }) {
 
   async function logout() {
     try {
-      await fetch("http://localhost:8000/api/auth/logout", {
+      await fetch(`${API_BASE}/api/auth/logout`, {
         method: "POST",
         credentials: "include"
       });

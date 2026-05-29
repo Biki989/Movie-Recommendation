@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import MovieCard from "../components/MovieCard";
+import { API_BASE } from "../config";
 
 export default function Bookmarks() {
   const { user, loading: authLoading } = useAuth();
@@ -23,7 +24,7 @@ export default function Bookmarks() {
     if (!user) return;
     async function fetchBookmarks() {
       try {
-        const resp = await fetch("http://localhost:8000/api/movies/bookmarks", { credentials: "include" });
+        const resp = await fetch(`${API_BASE}/api/movies/bookmarks`, { credentials: "include" });
         if (resp.status === 200) {
           const data = await resp.json();
           setBookmarks(data);

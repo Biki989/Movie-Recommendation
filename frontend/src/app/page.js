@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "./context/AuthContext";
 import MovieCard from "./components/MovieCard";
+import { API_BASE } from "./config";
 
 export default function Home() {
   const { user } = useAuth();
@@ -14,7 +15,7 @@ export default function Home() {
   useEffect(() => {
     async function fetchTrending() {
       try {
-        const resp = await fetch("http://localhost:8000/api/movies/trending");
+        const resp = await fetch(`${API_BASE}/api/movies/trending`);
         if (resp.status === 200) {
           const data = await resp.json();
           setTrending(data);

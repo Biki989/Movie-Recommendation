@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
+import { API_BASE } from "../config";
 
 export default function AdminDashboard() {
   const { user, loading: authLoading } = useAuth();
@@ -32,8 +33,8 @@ export default function AdminDashboard() {
     async function fetchDashboardData() {
       try {
         const [statsResp, histResp] = await Promise.all([
-          fetch("http://localhost:8000/api/admin/stats", { credentials: "include" }),
-          fetch("http://localhost:8000/api/admin/training-history", { credentials: "include" })
+          fetch(`${API_BASE}/api/admin/stats`, { credentials: "include" }),
+          fetch(`${API_BASE}/api/admin/training-history`, { credentials: "include" })
         ]);
         
         if (statsResp.status === 200) {
@@ -60,7 +61,7 @@ export default function AdminDashboard() {
 
     const interval = setInterval(async () => {
       try {
-        const resp = await fetch("http://localhost:8000/api/admin/training-status", { credentials: "include" });
+        const resp = await fetch(`${API_BASE}/api/admin/training-status`, { credentials: "include" });
         if (resp.status === 200) {
           const statusData = await resp.json();
           setTrainStatus(statusData);
@@ -68,8 +69,8 @@ export default function AdminDashboard() {
           if (!statusData.running) {
             // Training finished! Refresh stats and curves
             const [statsResp, histResp] = await Promise.all([
-              fetch("http://localhost:8000/api/admin/stats", { credentials: "include" }),
-              fetch("http://localhost:8000/api/admin/training-history", { credentials: "include" })
+              fetch(`${API_BASE}/api/admin/stats`, { credentials: "include" }),
+              fetch(`${API_BASE}/api/admin/training-history`, { credentials: "include" })
             ]);
             if (statsResp.status === 200) setStats(await statsResp.json());
             if (histResp.status === 200) setHistory(await histResp.json());
@@ -85,7 +86,7 @@ export default function AdminDashboard() {
   const handleRetrainSubmit = async () => {
     setError("");
     try {
-      const resp = await fetch("http://localhost:8000/api/admin/retrain", {
+      const resp = await fetch(`${API_BASE}/api/admin/retrain`, {
         method: "POST",
         credentials: "include"
       });

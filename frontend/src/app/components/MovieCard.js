@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { API_BASE } from "../config";
 
 export default function MovieCard({ 
   movie, 
@@ -23,7 +24,7 @@ export default function MovieCard({
     }
     
     try {
-      const resp = await fetch("http://localhost:8000/api/movies/bookmark", {
+      const resp = await fetch(`${API_BASE}/api/movies/bookmark`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -51,7 +52,7 @@ export default function MovieCard({
     }
     
     try {
-      const resp = await fetch("http://localhost:8000/api/movies/rate", {
+      const resp = await fetch(`${API_BASE}/api/movies/rate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -70,7 +71,7 @@ export default function MovieCard({
     } catch (e) {}
   };
 
-  const posterUrl = `http://localhost:8000/api/movies/poster?title=${encodeURIComponent(movie.title)}`;
+  const posterUrl = `${API_BASE}/api/movies/poster?title=${encodeURIComponent(movie.title)}`;
 
   return (
     <div className="movie-card animate-fade-in">

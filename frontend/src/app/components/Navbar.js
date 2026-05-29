@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
+import { API_BASE } from "../config";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -38,7 +39,7 @@ export default function Navbar() {
     }
     const delayDebounce = setTimeout(async () => {
       try {
-        const resp = await fetch(`http://localhost:8000/api/movies/search?q=${encodeURIComponent(searchQuery)}`);
+        const resp = await fetch(`${API_BASE}/api/movies/search?q=${encodeURIComponent(searchQuery)}`);
         if (resp.status === 200) {
           const data = await resp.json();
           setSuggestions(data);

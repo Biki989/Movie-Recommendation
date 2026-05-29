@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
+import { API_BASE } from "../config";
 
 export default function History() {
   const { user, loading: authLoading } = useAuth();
@@ -22,7 +23,7 @@ export default function History() {
     if (!user) return;
     async function fetchHistory() {
       try {
-        const resp = await fetch("http://localhost:8000/api/movies/history", { credentials: "include" });
+        const resp = await fetch(`${API_BASE}/api/movies/history`, { credentials: "include" });
         if (resp.status === 200) {
           const data = await resp.json();
           setHistory(data);

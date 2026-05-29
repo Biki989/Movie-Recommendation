@@ -3,6 +3,7 @@
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import MovieCard from "../components/MovieCard";
+import { API_BASE } from "../config";
 
 function SearchResultsContent() {
   const searchParams = useSearchParams();
@@ -23,7 +24,7 @@ function SearchResultsContent() {
       setLoading(true);
       setError("");
       try {
-        const resp = await fetch(`http://localhost:8000/api/movies/search?q=${encodeURIComponent(query)}`);
+        const resp = await fetch(`${API_BASE}/api/movies/search?q=${encodeURIComponent(query)}`);
         if (resp.status === 200) {
           const data = await resp.json();
           setResults(data);

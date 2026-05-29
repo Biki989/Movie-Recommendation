@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import MovieCard from "../components/MovieCard";
+import { API_BASE } from "../config";
 
 export default function Recommendations() {
   const { user, loading: authLoading } = useAuth();
@@ -27,7 +28,7 @@ export default function Recommendations() {
     if (!user) return;
     async function fetchGenres() {
       try {
-        const resp = await fetch("http://localhost:8000/api/movies/genres");
+        const resp = await fetch(`${API_BASE}/api/movies/genres`);
         if (resp.status === 200) {
           const data = await resp.json();
           setGenres(["All", ...data]);
@@ -46,8 +47,8 @@ export default function Recommendations() {
       setError("");
       try {
         const url = activeGenre === "All" 
-          ? "http://localhost:8000/api/movies/recommendations"
-          : `http://localhost:8000/api/movies/recommendations?genre=${encodeURIComponent(activeGenre)}`;
+          ? `${API_BASE}/api/movies/recommendations`
+          : `${API_BASE}/api/movies/recommendations?genre=${encodeURIComponent(activeGenre)}`;
           
         const resp = await fetch(url, { credentials: "include" });
         if (resp.status === 200) {
