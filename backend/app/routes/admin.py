@@ -13,7 +13,7 @@ try:
     from app.services.train_job import train_model, HISTORY_PATH
 except ImportError:
     train_model = None
-    MODEL_DIR = os.path.join(settings.BASE_DIR, "..", "models")
+    MODEL_DIR = os.path.join(settings.BASE_DIR, "models")
     HISTORY_PATH = os.path.join(MODEL_DIR, "training_history.json")
 
 router = APIRouter(prefix="/admin", tags=["Admin Dashboard"])

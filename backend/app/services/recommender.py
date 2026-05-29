@@ -14,9 +14,9 @@ from app.config import settings
 from app.services.preprocessing import get_movie_genres
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
-MODEL_PATH   = os.path.join(settings.BASE_DIR, "..", "models", "recommender_model.pt")
-WEIGHTS_PATH = os.path.join(settings.BASE_DIR, "..", "models", "ncf_weights.pkl")
-ENCODER_PATH = os.path.join(settings.BASE_DIR, "..", "models", "encoders.pkl")
+MODEL_PATH   = os.path.join(settings.BASE_DIR, "models", "recommender_model.pt")
+WEIGHTS_PATH = os.path.join(settings.BASE_DIR, "models", "ncf_weights.pkl")
+ENCODER_PATH = os.path.join(settings.BASE_DIR, "models", "encoders.pkl")
 
 # ── Hyper-parameters ──────────────────────────────────────────────────────────
 EMBEDDING_DIM = 50
