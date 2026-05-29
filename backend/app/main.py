@@ -86,3 +86,35 @@ async def global_exception_handler(request: Request, exc: Exception):
 async def health_check():
     """Verify backend server liveliness."""
     return {"status": "healthy", "service": settings.PROJECT_NAME}
+
+
+@app.get("/api/debug-model")
+async def debug_model():
+    """Debug route to inspect packaged files and paths in production."""
+    import os
+    import sys
+    from app.services.recommender import MODEL_PATH, WEIGHTS_PATH, ENCODER_PATH
+    
+    app_dir = os.path.dirname(os.path.abspath(__file__)) # backend/app
+    
+    # List files inside backend/app recursively to see where the models were packaged
+    structure = {}
+    try:
+        for root, dirs, files in os.walk(app_dir):
+            rel = os.path.relpath(root, app_dir)
+            structure[rel] = files
+    except Exception as e:
+        structure["error"] = str(e)
+        
+    return {
+        "cwd": os.getcwd(),
+        "base_dir": settings.BASE_DIR,
+        "model_path": MODEL_PATH,
+        "weights_path": WEIGHTS_PATH,
+        "encoder_path": ENCODER_PATH,
+        "model_exists": os.path.exists(MODEL_PATH),
+        "weights_exists": os.path.exists(WEIGHTS_PATH),
+        "encoder_exists": os.path.exists(ENCODER_PATH),
+        "app_dir": app_dir,
+        "structure": structure
+    }
